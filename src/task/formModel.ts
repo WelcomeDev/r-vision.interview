@@ -24,5 +24,4 @@ export const defaultValues: ScanJobFormValues = {
 export const STEPS: StepDescriptor[] = [
   { id: 'general', title: 'Основное' },
   { id: 'scope', title: 'Область сканирования' },
-  { id: 'confirm', title: 'Подтверждение' },
 ];

@@ -80,12 +80,11 @@ export function Showcase() {
         <Stepper
           steps={[
             { id: 'general', title: 'Основное' },
-            { id: 'scope', title: 'Область', description: 'активы' },
-            { id: 'confirm', title: 'Подтверждение' },
+            { id: 'scope', title: 'Область сканирования', description: 'активы' },
           ]}
           current={step}
           completed={[0]}
-          invalid={[2]}
+          invalid={[1]}
           isStepEnabled={() => true}
           onStepClick={setStep}
         />
