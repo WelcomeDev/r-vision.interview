@@ -1,6 +1,6 @@
 # Песочница для live-coding: многошаговая форма
 
-React 18 + TypeScript + Vite. Стек намеренно совпадает с боевым: `react-hook-form@7` + `yup`.
+React 18 + TypeScript + Vite, `react-hook-form@7` + `yup`, данные — через RTK Query.
 
 - [TASK.md](./TASK.md) — задание кандидату.
 - `INTERVIEWER.md` — шпаргалка интервьюеру: лежит рядом локально и намеренно исключена
@@ -20,7 +20,7 @@ npm install && npm run dev
 ```
 src/
   components/     готовые UI-компоненты (форму не знают, полностью управляемые)
-  api/            мок-бэкенд: задержки, AbortSignal, 422 и 500 (хук загрузки пишет кандидат)
+  api/            RTK Query (scanApi.ts, store.ts) поверх мок-бэкенда: задержки, 422 и 500
   task/           точка входа кандидата: formModel.ts + ScanJobWizard.tsx
   Showcase.tsx    витрина компонентов
 .devcontainer/    автозапуск в GitHub Codespaces (+ Live Share)
@@ -30,15 +30,16 @@ src/
 
 ## Мок-API
 
-По умолчанию используется встроенный `src/api/mockApi.ts` — сети нет, всё детерминировано:
+Хуки из `src/api/scanApi.ts` (RTK Query, `fakeBaseQuery`) ходят во встроенный
+`src/api/mockApi.ts` — сети нет, всё детерминировано:
 
 | Метод | Задержка | Зачем в задаче |
 | --- | --- | --- |
-| `getScanTypes()` | 200 мс | простой select, есть `disabled`-опция |
+| `getScanTypes()` | 200 мс | простой select |
 | `getProfiles(scanType)` | 700 мс | зависимый select, видно состояние загрузки |
 | `getTags()` | 300 мс | мультиселект с тегами |
 | `getAssetGroups()` | 200 мс | фильтр по группе |
-| `getAssets({ search, groupId }, signal)` | 800 мс | таблица, поиск с debounce, отмена гонки запросов |
+| `getAssets({ search, groupId })` | 800 мс | таблица, поиск с debounce; гонку разруливает кеш RTK Query |
 | `checkJobName(name)` | 600 мс | асинхронная валидация уникальности |
 | `createScanJob(payload)` | 1200 мс | сабмит; кидает `ApiValidationError` (422) с `fieldErrors` |
 
@@ -67,7 +68,8 @@ src/
 управляемые ответы, включая 422 по конкретным полям.
 
 Точка подмены одна: `src/api/mockApi.ts` — замените тела методов на `fetch`, сигнатуры
-трогать не придётся.
+трогать не придётся. Либо смените `fakeBaseQuery` на `fetchBaseQuery` в `scanApi.ts` и опишите
+эндпоинты напрямую.
 
 ## Как расшарить кандидату из GitHub
 

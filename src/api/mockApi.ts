@@ -40,7 +40,6 @@ const SCAN_TYPES: Option[] = [
   { value: 'inventory', label: 'Инвентаризация', description: 'сбор данных об активах' },
   { value: 'vuln', label: 'Поиск уязвимостей' },
   { value: 'compliance', label: 'Проверка соответствия' },
-  { value: 'pentest', label: 'Пентест', description: 'требует согласования', disabled: true },
 ];
 
 const PROFILES: Record<string, Option[]> = {
@@ -57,7 +56,6 @@ const PROFILES: Record<string, Option[]> = {
     { value: 'cis', label: 'CIS Benchmarks' },
     { value: 'gost-57580', label: 'ГОСТ Р 57580.1' },
   ],
-  pentest: [],
 };
 
 /** Имена, уже занятые «на бэкенде» — для асинхронной проверки уникальности. */

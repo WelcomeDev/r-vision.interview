@@ -10,12 +10,14 @@ import { STEPS } from './formModel';
  *
  * Полное описание — в TASK.md.
  *
- * Готовые компоненты: ../components (Field, TextInput, Select, MultiSelect, DataTable,
- * TableCellInput, Stepper, Checkbox, Button, Alert).
- * Данные: ../api (api.* — промисы с задержкой; принимают AbortSignal).
+ * Готовые компоненты: ../components (TextField, SelectField, MultiSelectField — Field + контрол;
+ * отдельные Field, TextInput, Select, MultiSelect; DataTable, TableCellInput, Stepper,
+ * Checkbox, Button, Alert).
+ * Данные: ../api — хуки RTK Query (useGetScanTypesQuery, useGetAssetsQuery,
+ * useLazyCheckJobNameQuery, useCreateScanJobMutation и т.д.), store уже подключён.
  * Модель формы и список шагов: ./formModel.
  *
- * Библиотеки уже стоят: react-hook-form + yup + @hookform/resolvers.
+ * Библиотеки уже стоят: react-hook-form + yup + @hookform/resolvers + @reduxjs/toolkit.
  * Можно и без них — на useState, если так удобнее. Главное — объяснить выбор.
  */
 export function ScanJobWizard() {

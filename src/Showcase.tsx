@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { api } from './api';
+import { useGetAssetsQuery, useGetScanTypesQuery, useGetTagsQuery } from './api';
 import {
   Alert,
   Button,
@@ -8,13 +8,14 @@ import {
   Column,
   DataTable,
   Field,
-  MultiSelect,
-  Select,
+  MultiSelectField,
+  SelectField,
   Stepper,
   TableCellInput,
+  TextField,
   TextInput,
 } from './components';
-import type { Asset, Option } from './api';
+import type { Asset } from './api';
 
 /**
  * Витрина готовых компонентов: как они выглядят и какие пропсы принимают.
@@ -27,21 +28,12 @@ export function Showcase() {
   const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
   const [ports, setPorts] = useState<Record<string, string>>({});
   const [onlyCritical, setOnlyCritical] = useState(false);
+  const [defaultPorts, setDefaultPorts] = useState('');
   const [step, setStep] = useState(1);
 
-  const [scanTypes, setScanTypes] = useState<Option[]>([]);
-  const [tagOptions, setTagOptions] = useState<Option[]>([]);
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [assetsLoading, setAssetsLoading] = useState(true);
-
-  useEffect(() => {
-    api.getScanTypes().then(setScanTypes);
-    api.getTags().then(setTagOptions);
-    api.getAssets().then((rows) => {
-      setAssets(rows);
-      setAssetsLoading(false);
-    });
-  }, []);
+  const scanTypes = useGetScanTypesQuery();
+  const tagOptions = useGetTagsQuery();
+  const assets = useGetAssetsQuery({});
 
   const columns: Column<Asset>[] = [
     { key: 'hostname', title: 'Хост', render: (row) => row.hostname, sortValue: (row) => row.hostname },
@@ -77,7 +69,10 @@ export function Showcase() {
     <div className="stack">
       <Alert variant="info" title="Витрина компонентов">
         Все контролы управляемые: <code>value</code> + <code>onChange</code>, плюс <code>invalid</code> для подсветки
-        ошибки. Обёртка <code>Field</code> отвечает за label, hint, текст ошибки и aria-атрибуты.
+        ошибки. Готовые пары <code>TextField</code> / <code>SelectField</code> / <code>MultiSelectField</code> — это
+        уже собранные Field + контрол. Данные здесь
+        приходят из хуков RTK Query — <code>useGetScanTypesQuery</code>, <code>useGetTagsQuery</code>,{' '}
+        <code>useGetAssetsQuery</code>.
       </Alert>
 
       <div className="panel">
@@ -99,50 +94,37 @@ export function Showcase() {
       <div className="panel">
         <h3 className="panel__title">Поля ввода</h3>
         <div className="row">
-          <Field
+          <TextField
             label="Название задачи"
             required
             hint="От 3 до 60 символов"
             error={name.length > 0 && name.length < 3 ? 'Слишком короткое название' : undefined}
-          >
-            {(fieldProps) => (
-              <TextInput
-                {...fieldProps}
-                value={name}
-                onChange={setName}
-                clearable
-                placeholder="Например, Nightly DMZ scan"
-                invalid={name.length > 0 && name.length < 3}
-              />
-            )}
-          </Field>
+            value={name}
+            onChange={setName}
+            clearable
+            placeholder="Например, Nightly DMZ scan"
+          />
 
-          <Field label="Тип сканирования" required hint="Пентест требует согласования и выключен">
-            {(fieldProps) => (
-              <Select
-                {...fieldProps}
-                options={scanTypes}
-                loading={scanTypes.length === 0}
-                value={scanType}
-                onChange={setScanType}
-                clearable
-                searchable
-              />
-            )}
-          </Field>
+          <SelectField
+            label="Тип сканирования"
+            required
+            options={scanTypes.data ?? []}
+            loading={scanTypes.isLoading}
+            value={scanType}
+            onChange={setScanType}
+            clearable
+            searchable
+          />
 
-          <Field label="Теги" hint="Мультиселект с поиском и чипами">
-            {(fieldProps) => (
-              <MultiSelect
-                {...fieldProps}
-                options={tagOptions}
-                loading={tagOptions.length === 0}
-                value={tags}
-                onChange={setTags}
-                invalid={tags.length > 5}
-              />
-            )}
-          </Field>
+          <MultiSelectField
+            label="Теги"
+            hint="Мультиселект с поиском и чипами"
+            error={tags.length > 5 ? 'Не больше пяти тегов' : undefined}
+            options={tagOptions.data ?? []}
+            loading={tagOptions.isLoading}
+            value={tags}
+            onChange={setTags}
+          />
         </div>
 
         <div style={{ marginTop: 16 }}>
@@ -151,12 +133,27 @@ export function Showcase() {
       </div>
 
       <div className="panel">
+        <h3 className="panel__title">Ручная сборка: Field + контрол</h3>
+        <p className="muted" style={{ marginTop: 0 }}>
+          <code>TextField</code>, <code>SelectField</code> и <code>MultiSelectField</code> — это Field плюс контрол.
+          Когда нужна своя разметка, те же кирпичики собираются вручную:
+        </p>
+        <div className="row">
+          <Field label="Порты по умолчанию" hint="Field отдаёт id и aria-атрибуты через render-prop">
+            {(fieldProps) => (
+              <TextInput {...fieldProps} value={defaultPorts} onChange={setDefaultPorts} placeholder="22,80,443" />
+            )}
+          </Field>
+        </div>
+      </div>
+
+      <div className="panel">
         <h3 className="panel__title">Таблица с выбором строк и редактированием ячейки</h3>
         <DataTable
-          rows={assets}
+          rows={assets.data ?? []}
           columns={columns}
           rowKey={(row) => row.id}
-          loading={assetsLoading}
+          loading={assets.isLoading}
           selectedKeys={selectedAssets}
           onSelectionChange={setSelectedAssets}
           isRowDisabled={(row) => !row.agentInstalled}

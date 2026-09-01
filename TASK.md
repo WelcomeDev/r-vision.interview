@@ -12,16 +12,19 @@
 
 | Что | Где | Комментарий |
 | --- | --- | --- |
-| Компоненты | `src/components` | `Field`, `TextInput`, `Select`, `MultiSelect`, `DataTable`, `TableCellInput`, `Stepper`, `Checkbox`, `Button`, `Alert` |
+| Компоненты | `src/components` | `TextField`, `SelectField`, `MultiSelectField` — Field + контрол одной строкой; отдельные `Field`, `TextInput`, `Select`, `MultiSelect` — для ручной сборки; плюс `DataTable`, `TableCellInput`, `Stepper`, `Checkbox`, `Button`, `Alert` |
 | Витрина компонентов | вкладка «Компоненты» в приложении | живой пример пропсов каждого компонента |
-| Мок-API | `src/api` | `api.*` — промисы с задержкой, поддержкой `AbortSignal` и ошибками |
+| Данные | `src/api/scanApi.ts` | RTK Query поверх мок-бэкенда: `useGetScanTypesQuery`, `useGetProfilesQuery`, `useGetTagsQuery`, `useGetAssetGroupsQuery`, `useGetAssetsQuery`, `useLazyCheckJobNameQuery`, `useCreateScanJobMutation` |
+| Мок-бэкенд | `src/api/mockApi.ts` | промисы с задержкой и ошибками; store уже подключён в `main.tsx` |
 | Модель формы и шаги | `src/task/formModel.ts` | стартовая точка, менять можно |
 | Точка входа | `src/task/ScanJobWizard.tsx` | тут вы и пишете |
 
-Все контролы управляемые: `value` + `onChange` + `invalid`. Обёртка `Field` рисует label,
-подсказку, текст ошибки и раздаёт `id` / `aria-*`.
+Все контролы управляемые: `value` + `onChange` + `invalid`. `TextField` / `SelectField` /
+`MultiSelectField` — это уже собранные `Field` + контрол: принимают `label`, `required`, `hint`,
+`error` и пропсы контрола одним списком. Если нужна нестандартная разметка, те же кирпичики
+собираются вручную через `Field` с render-prop.
 
-В зависимостях уже стоят `react-hook-form`, `yup`, `@hookform/resolvers`. Можно обойтись
+В зависимостях уже стоят `react-hook-form`, `yup`, `@hookform/resolvers`, `@reduxjs/toolkit`. Можно обойтись
 `useState` — важно уметь объяснить выбор.
 
 ## Шаги мастера
@@ -30,15 +33,15 @@
 
 | Поле | Контрол | Правила |
 | --- | --- | --- |
-| Название задачи | `TextInput` | обязательное; 3–60 символов; буквы, цифры, пробел, дефис; уникальность проверяется через `api.checkJobName` (занято: `Nightly scan`, `Аудит DMZ`, `Weekly vuln scan`) |
-| Тип сканирования | `Select` (`api.getScanTypes`) | обязательный; «Пентест» отключён |
-| Профиль | `Select` (`api.getProfiles(scanType)`) | обязательный; список зависит от типа, грузится асинхронно; заблокирован, пока тип не выбран; при смене типа значение сбрасывается |
-| Теги | `MultiSelect` (`api.getTags`) | необязательные, не более 5 |
+| Название задачи | `TextInput` | обязательное; 3–60 символов; буквы, цифры, пробел, дефис; уникальность проверяется через `useLazyCheckJobNameQuery` (занято: `Nightly scan`, `Аудит DMZ`, `Weekly vuln scan`) |
+| Тип сканирования | `Select` (`useGetScanTypesQuery`) | обязательный |
+| Профиль | `Select` (`useGetProfilesQuery`) | обязательный; список зависит от типа, грузится асинхронно; заблокирован, пока тип не выбран; при смене типа значение сбрасывается |
+| Теги | `MultiSelect` (`useGetTagsQuery`) | необязательные, не более 5 |
 
 ### Шаг 2. Область сканирования
 
-- Таблица активов: `api.getAssets({ search, groupId })`.
-- Поиск по хосту/IP (с debounce) и фильтр по группе (`api.getAssetGroups`).
+- Таблица активов: `useGetAssetsQuery({ search, groupId })`.
+- Поиск по хосту/IP (с debounce) и фильтр по группе (`useGetAssetGroupsQuery`).
 - Активы без агента (`agentInstalled: false`) выбрать нельзя — строка задизейблена.
 - Нужно выбрать **минимум один** актив.
 - Для каждого выбранного актива — обязательная строка портов, редактируется прямо в таблице
@@ -52,9 +55,9 @@
 
 - Сводка по всем шагам в человекочитаемом виде (названия, а не id: тип, профиль, теги,
   хосты активов с портами).
-- Кнопка «Создать» → `api.createScanJob(payload)`.
-- Бэкенд валидирует повторно и может вернуть `ApiValidationError` (422) с `fieldErrors`,
-  ключи — пути полей (`general.name`, `general.profileId`). Нужно:
+- Кнопка «Создать» → `useCreateScanJobMutation`.
+- Бэкенд валидирует повторно и может вернуть 422: у ошибки есть `fieldErrors`, ключи — пути
+  полей (`general.name`, `general.profileId`). Нужно:
   показать общий `Alert`, разложить ошибки по полям и вернуть пользователя на шаг с первой
   ошибкой, пометив этот шаг в `Stepper`.
 - Воспроизвести 422 можно так: название, содержащее `demo`; либо профиль «Полный набор
@@ -68,9 +71,9 @@
 3. По `Stepper` можно вернуться на пройденный шаг кликом; перепрыгнуть вперёд через
    невалидный шаг нельзя; шаг с ошибками помечается.
 4. Задача создаётся только по явному нажатию «Создать задачу» на последнем шаге.
-5. Состояния загрузки и ошибок сети видны пользователю. Обёртку над загрузкой данных
-   (`{ data, loading, error }`) пишете сами — методы `api.*` принимают `AbortSignal`.
-   `Select`, `MultiSelect`, `DataTable` и `Button` умеют `loading`.
+5. Состояния загрузки и ошибок сети видны пользователю: `isLoading` / `isFetching` / `error`
+   из хуков RTK Query, `Select`, `MultiSelect`, `DataTable` и `Button` умеют `loading`.
+   Запрос, для которого ещё нет аргумента, не должен уходить (`skipToken`).
 
 ## Definition of Done
 
@@ -78,8 +81,7 @@
 валидация обоих шагов, сохранение данных при возврате.
 
 **Дальше по времени:** сводка и сабмит, разбор 422 с переходом на нужный шаг,
-асинхронная проверка уникальности имени, отмена «гонки» запросов при поиске (`AbortSignal`),
-фокус на первом невалидном поле.
+асинхронная проверка уникальности имени, debounce поиска, фокус на первом невалидном поле.
 
 ## Что делать не нужно
 
