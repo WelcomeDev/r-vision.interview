@@ -22,8 +22,6 @@ const ASSETS: Asset[] = Array.from({ length: 28 }, (_, index) => {
     groupId: group.value,
     groupName: group.label,
     criticality,
-    // каждый седьмой актив без агента — его нельзя выбрать
-    agentInstalled: index % 7 !== 6,
   };
 });
 

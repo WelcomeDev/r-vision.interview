@@ -8,8 +8,6 @@ export interface Asset {
   groupId: string;
   groupName: string;
   criticality: Criticality;
-  /** Агент не установлен — актив нельзя включить в задачу. */
-  agentInstalled: boolean;
 }
 
 export interface Option {

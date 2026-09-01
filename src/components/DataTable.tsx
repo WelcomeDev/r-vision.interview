@@ -23,6 +23,8 @@ export interface DataTableProps<T> {
   isRowDisabled?: (row: T) => boolean;
   /** Подсветка строки с ошибкой валидации. */
   isRowInvalid?: (row: T) => boolean;
+  /** Подсказка, почему строку нельзя выбрать. */
+  disabledRowHint?: string;
   toolbar?: ReactNode;
 }
 
@@ -38,6 +40,7 @@ export function DataTable<T>({
   onSelectionChange,
   isRowDisabled,
   isRowInvalid,
+  disabledRowHint,
   toolbar,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
@@ -142,9 +145,11 @@ export function DataTable<T>({
                 return (
                   <tr
                     key={key}
+                    title={disabled ? disabledRowHint : undefined}
                     className={[
                       selected.has(key) ? 'is-selected' : '',
                       isRowInvalid?.(row) ? 'is-invalid' : '',
+                      disabled ? 'is-disabled' : '',
                     ].join(' ')}
                   >
                     {selectable && (

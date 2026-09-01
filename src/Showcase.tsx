@@ -156,7 +156,6 @@ export function Showcase() {
           loading={assets.isLoading}
           selectedKeys={selectedAssets}
           onSelectionChange={setSelectedAssets}
-          isRowDisabled={(row) => !row.agentInstalled}
           isRowInvalid={(row) => selectedAssets.includes(row.id) && /[^\d,\- ]/.test(ports[row.id] ?? '')}
           emptyText="Активы не найдены"
           toolbar={
