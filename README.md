@@ -76,17 +76,17 @@ src/
 
 ### Подготовка репозитория (один раз)
 
+Локальный репозиторий уже инициализирован, первый коммит сделан. Осталось создать пустой
+приватный репозиторий на github.com (без README и .gitignore) и запушить:
+
 ```bash
-mv interview/multistep-form-sandbox ~/repos/scan-job-wizard-task
-cd ~/repos/scan-job-wizard-task
-git init -b main && git add . && git commit -m "chore: interview task"
-gh repo create scan-job-wizard-task --private --source . --push
+git remote add origin https://github.com/<логин>/scan-job-wizard-task.git && git push -u origin main
 ```
 
 Полезно сразу включить в настройках репозитория **Template repository**: тогда кандидат жмёт
 «Use this template», получает свою приватную копию и не видит копии других кандидатов.
 
-Файл `INTERVIEWER.md` в общий репозиторий класть не стоит — держите его отдельно.
+`INTERVIEWER.md` и `.idea` в репозиторий не попадают — они в `.gitignore`.
 
 ### Варианты запуска
 
@@ -116,8 +116,3 @@ gh repo create scan-job-wizard-task --private --source . --push
 
 Если важнее **скорость старта** — StackBlitz: открывается за секунды, кандидат шарит экран,
 в конце присылает ссылку на форк со всем кодом.
-
-## Куда положить папку
-
-Каталог самодостаточен и с монорепозиторием `evo-core` не связан — переносите его целиком
-в отдельный репозиторий (см. раздел выше). Коммитить его в `evo-core` не нужно.
