@@ -5,3 +5,7 @@ dist
 # шпаргалка интервьюера — не уезжает в репозиторий кандидата
 INTERVIEWER.md
 .idea
+
+# эталонное решение — только для интервьюера
+solution/
+tsconfig.solution.json
