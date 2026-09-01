@@ -1,5 +1,5 @@
 import { apiConfig } from './config';
-import { ApiError, ApiValidationError, Asset, CreateScanJobPayload, CreateScanJobResult, Option, User } from './types';
+import { ApiError, ApiValidationError, Asset, CreateScanJobPayload, CreateScanJobResult, Option } from './types';
 
 const GROUPS: Option[] = [
   { value: 'dmz', label: 'DMZ' },
@@ -26,14 +26,6 @@ const ASSETS: Asset[] = Array.from({ length: 28 }, (_, index) => {
     agentInstalled: index % 7 !== 6,
   };
 });
-
-const USERS: User[] = [
-  { id: 'u-1', name: 'Анна Петрова', email: 'a.petrova@example.com' },
-  { id: 'u-2', name: 'Игорь Соколов', email: 'i.sokolov@example.com' },
-  { id: 'u-3', name: 'Мария Ким', email: 'm.kim@example.com' },
-  { id: 'u-4', name: 'Дмитрий Орлов', email: 'd.orlov@example.com' },
-  { id: 'u-5', name: 'SOC L1 (группа)', email: 'soc-l1@example.com' },
-];
 
 const TAGS: Option[] = [
   { value: 'pci-dss', label: 'PCI DSS' },
@@ -68,13 +60,6 @@ const PROFILES: Record<string, Option[]> = {
   pentest: [],
 };
 
-const PERIODICITY: Option[] = [
-  { value: 'once', label: 'Однократно' },
-  { value: 'daily', label: 'Ежедневно' },
-  { value: 'weekly', label: 'Еженедельно' },
-  { value: 'monthly', label: 'Ежемесячно' },
-];
-
 /** Имена, уже занятые «на бэкенде» — для асинхронной проверки уникальности. */
 const TAKEN_NAMES = ['nightly scan', 'аудит dmz', 'weekly vuln scan'];
 
@@ -108,10 +93,6 @@ export const api = {
   getTags: (signal?: AbortSignal) => delay(TAGS, 300, signal),
 
   getAssetGroups: (signal?: AbortSignal) => delay(GROUPS, 200, signal),
-
-  getPeriodicity: (signal?: AbortSignal) => delay(PERIODICITY, 150, signal),
-
-  getUsers: (signal?: AbortSignal) => delay(USERS, 400, signal),
 
   getAssets: (params: { search?: string; groupId?: string | null } = {}, signal?: AbortSignal) => {
     const search = params.search?.trim().toLowerCase() ?? '';

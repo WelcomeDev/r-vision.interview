@@ -19,12 +19,6 @@ export interface Option {
   disabled?: boolean;
 }
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 export interface ScanTargetPayload {
   assetId: string;
   /** Строка портов: «22,80,443» или «1000-2000». */
@@ -40,12 +34,6 @@ export interface CreateScanJobPayload {
   };
   scope: {
     targets: ScanTargetPayload[];
-  };
-  schedule: {
-    periodicity: string;
-    time: string;
-    recipientIds: string[];
-    onlyCritical: boolean;
   };
 }
 

@@ -86,7 +86,6 @@ export function Showcase() {
           steps={[
             { id: 'general', title: 'Основное' },
             { id: 'scope', title: 'Область', description: 'активы' },
-            { id: 'schedule', title: 'Расписание' },
             { id: 'confirm', title: 'Подтверждение' },
           ]}
           current={step}
@@ -147,7 +146,7 @@ export function Showcase() {
         </div>
 
         <div style={{ marginTop: 16 }}>
-          <Checkbox checked={onlyCritical} onChange={setOnlyCritical} label="Уведомлять только о критичных находках" />
+          <Checkbox checked={onlyCritical} onChange={setOnlyCritical} label="Учитывать только активы с агентом" />
         </div>
       </div>
 

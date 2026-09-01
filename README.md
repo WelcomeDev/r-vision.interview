@@ -36,8 +36,8 @@ src/
 | --- | --- | --- |
 | `getScanTypes()` | 200 мс | простой select, есть `disabled`-опция |
 | `getProfiles(scanType)` | 700 мс | зависимый select, видно состояние загрузки |
-| `getTags()` / `getUsers()` | 300–400 мс | мультиселекты |
-| `getAssetGroups()` / `getPeriodicity()` | 150–200 мс | фильтр и select |
+| `getTags()` | 300 мс | мультиселект с тегами |
+| `getAssetGroups()` | 200 мс | фильтр по группе |
 | `getAssets({ search, groupId }, signal)` | 800 мс | таблица, поиск с debounce, отмена гонки запросов |
 | `checkJobName(name)` | 600 мс | асинхронная валидация уникальности |
 | `createScanJob(payload)` | 1200 мс | сабмит; кидает `ApiValidationError` (422) с `fieldErrors` |
